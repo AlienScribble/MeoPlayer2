@@ -149,6 +149,22 @@ namespace MeoMo {
             Load_TXT(imageFolder, s, adjust_scale, adjustOrder);
         }
         #endregion
+            
+            
+        
+        // C R O S S  P L A T F O R M   R E M O V E  P A T H   R E M O V E   E X T E N S I O N   ( ADDED )
+        string CrossPlatform_RemovePath_RemoveExtenstion(string s) {
+            int ln = s.Length-1, end_i=1, start_i=0;
+            string filenom = "";
+            for(int a=ln; a>0; a--) {
+                if (s[a]=='.') end_i=a;
+                if ((s[a]=='/')||(s[a]=='\\')) {start_i = a+1; break;}
+            }
+            for (int a=start_i; a<end_i; a++) {
+                filenom += s[a];
+            }
+            return filenom;
+        }
 
 
 
@@ -169,7 +185,8 @@ namespace MeoMo {
                 strs = line.Split(','); 
                 if ((strs[0] != "SPRITESHEET_FILENAME")&&(strs[0]!="COMBO_FILENAME")) { Debug.WriteLine("Data="+strs[0]); Debug.WriteLine("\n Unexpected first line in " + Filename + " while trying to load as .TXT MeoMotion file."); return; }
                 string image_filename = Path.GetFileName(strs[1]);
-                image_filename = ImagePath + Path.GetFileNameWithoutExtension(image_filename);
+                // MODIFIED: 
+                image_filename = ImagePath + CrossPlatform_RemovePath_RemoveExtenstion(image_filename); //Path.GetFileNameWithoutExtension(image_filename);
 
                 tex = content.Load<Texture2D>(image_filename);  // load actual spritemap
                 // continue loadint txt:
@@ -202,7 +219,11 @@ namespace MeoMo {
                     line = reader.ReadLine(); strs = line.Split(',');
                     switch (strs[0])
                     {
-                        case "SPRITESHEET_FILENAME": current_sheetname = Path.GetFileNameWithoutExtension(strs[1]); first = true; break; // SET FIRST so we know to set the first index
+                        case "SPRITESHEET_FILENAME": 
+                            // MODIFIED
+                            current_sheetname = CrossPlatform_RemovePath_RemoveExtenstion(strs[1]); //Path.GetFileNameWithoutExtension(strs[1]); 
+                            first = true; 
+                            break; // SET FIRST so we know to set the first index
                         case "TOTAL_NUM_PARTS": part_count   = Convert.ToInt32(strs[1]); if (part_count > max_parts) max_parts = part_count; break;
                         case "ROOT_INDEX":      current_root = Convert.ToInt32(strs[1]);  break;
                         case "PART_INDEX":  p = Convert.ToInt32(strs[1]); if (p >= num_parts) { Debug.WriteLine("Meo file integrity problem: part index p>=part_count"); return; }
